@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_ACCOUNT_ID: 391378411314 
+    AWS_ACCOUNT_ID: 925352035051 
     IMAGE_REPO_NAME: hello-protos
     EKS_CLUSTER: hello-protos
 
