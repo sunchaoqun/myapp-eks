@@ -28,7 +28,7 @@ variable "repo" {
   default = "myapp-eks"
 }
 variable "gitHubToken" {
-  default = "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"
+  default = ""
 }
 
 
