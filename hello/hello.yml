@@ -29,19 +29,26 @@ spec:
   selector:
     app: hello
   ports:
-    - port: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
   #type: LoadBalancer
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hello
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-    - host: '*.satoshi.tech'
-      http:
-        paths:
-          - backend:
-              serviceName: hello
-              servicePort: 8080
-            path: /
+  - http:
+      paths:
+      - path: /hello
+        pathType: Prefix
+        backend:
+          service:
+            name: hello
+            port:
+              number: 80

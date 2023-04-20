@@ -45,6 +45,32 @@ resource "aws_eks_cluster" "eks" {
   ]
 }
 
+data "aws_eks_cluster_auth" "cluster_auth" {
+  name = var.tag
+}
+
+provider "kubernetes" {
+  host                   = "${aws_eks_cluster.eks.endpoint}"
+  cluster_ca_certificate = "${base64decode(aws_eks_cluster.eks.certificate_authority.0.data)}"
+  token                  = ""
+}
+
+resource "kubernetes_config_map" "aws_auth_configmap" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+  data = {
+      mapRoles = <<YAML
+  - rolearn: ${var.tag}-eks-node-group-role
+    username: system:node:{{EC2PrivateDNSName}}
+    groups:
+      - system:bootstrappers
+      - system:nodes
+  YAML
+    }
+}
+
 output "endpoint" {
   value = aws_eks_cluster.eks.endpoint
 }
@@ -91,9 +117,9 @@ resource "aws_eks_node_group" "nodegroup" {
   subnet_ids      = data.aws_subnet_ids.default.ids
 
   scaling_config {
-    desired_size = 2
-    max_size     = 4
-    min_size     = 2
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
